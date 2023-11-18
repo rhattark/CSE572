@@ -15,6 +15,15 @@ def euclidean_distance(first, second):
     distance = np.sqrt(sum_of_squares)
     return distance
 
+def sse(X, centroids, pts_in_centroids):
+    sse = 0
+
+    for i, centroid in enumerate(centroids):
+        cluster_pts = X[pts_in_centroids[i]]
+        sse += np.sum((cluster_pts - centroid) ** 2)
+
+    return sse
+
 def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
     X_len = len(X)
     random_idx_list = np.random.choice(range(X_len), size=num_clusters, replace=False)
@@ -36,6 +45,8 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
             break
 
         centroids = new_centroids
+
+    print(sse(X, centroids, pts_in_centroids))
         
     return new_centroids
 
@@ -45,4 +56,3 @@ if __name__ == "__main__":
     X, y = read_csv_get_X_y()
     num_clusters = get_num_clusters(y)
     centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=50)
-    print(centroids)
