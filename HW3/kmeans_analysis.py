@@ -15,6 +15,9 @@ def euclidean_distance(first, second):
     distance = np.sqrt(sum_of_squares)
     return distance
 
+def cosine_distance(first, second):
+    return 1 - np.dot(first, second) / (np.linalg.norm(first) * np.linalg.norm(second))
+
 def sse(X, centroids, pts_in_centroids):
     sse = 0
 
@@ -46,7 +49,7 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
 
         centroids = new_centroids
 
-    print(sse(X, centroids, pts_in_centroids))
+    print('Sum of squared error: ', sse(X, centroids, pts_in_centroids))
         
     return new_centroids
 
@@ -55,4 +58,7 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
 if __name__ == "__main__":
     X, y = read_csv_get_X_y()
     num_clusters = get_num_clusters(y)
+    print('Euclidean Distance:')
     centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=50)
+    print('Cosine Distance')
+    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=50)
