@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter
 
 def read_csv_get_X_y():
     X = np.genfromtxt('kmeans_data/data.csv', delimiter=',')
@@ -61,22 +62,54 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
     sse_value = sse(X, centroids, pts_in_centroids)
     print('Sum of squared error: ', sse_value)
         
-    return new_centroids
+    return new_centroids, pts_in_centroids
 
+def get_labels_clustered_data(X, y, pts_in_centroids):
+    labeled_data = []
+    
+    for group in pts_in_centroids:
+        counter = Counter(y[group])
+        label = counter.most_common(1)[0][0]
+        group_labeled_data = [[idx, label] for idx in group]
+        labeled_data.extend(group_labeled_data)
 
+    labeled_data.sort(key=lambda x : x[0])
+
+    return np.array([label for idx, label in labeled_data])
+
+def get_accuracy(first, second):
+    correct_predictions = np.sum(first == second)
+    size = len(first)
+    return correct_predictions / size * 100
 
 if __name__ == "__main__":
     X, y = read_csv_get_X_y()
     num_clusters = get_num_clusters(y)
 
+    # Q1
+
     print('Euclidean Distance:')
-    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=150)
+    euc_centroids, euc_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=150)
     print()
 
     print('Cosine Distance:')
-    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=150)
+    cos_centroids, cos_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=150)
     print()
 
     print('Generalized Jaccard Distance:')
-    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=150)
+    jac_centroids, jac_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=150)
     print()
+
+    # Q2
+
+    euc_labels = get_labels_clustered_data(X, y, euc_pts_in_centroids)
+    euc_accuracy = get_accuracy(euc_labels, y)
+    print(f'Accuracy with Euclidean Distance: {euc_accuracy}%')
+
+    cos_labels = get_labels_clustered_data(X, y, cos_pts_in_centroids)
+    cos_accuracy = get_accuracy(cos_labels, y)
+    print(f'Accuracy with Cosine Distance: {cos_accuracy}%')
+
+    jac_labels = get_labels_clustered_data(X, y, jac_pts_in_centroids)
+    jac_accuracy = get_accuracy(jac_labels, y)
+    print(f'Accuracy with Generalized Jaccard Distance: {jac_accuracy}%')
