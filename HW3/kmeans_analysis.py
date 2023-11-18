@@ -15,7 +15,7 @@ def euclidean_distance(first, second):
     distance = np.sqrt(sum_of_squares)
     return distance
 
-def kmeans_max_iterations(X, y, num_clusters, distance_fn, max_iterations):
+def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
     X_len = len(X)
     random_idx_list = np.random.choice(range(X_len), size=num_clusters, replace=False)
     centroids = X[random_idx_list]
@@ -30,6 +30,12 @@ def kmeans_max_iterations(X, y, num_clusters, distance_fn, max_iterations):
             pts_in_centroids[idx_closest_centroid].append(pt_idx)
 
         new_centroids = [X[cent_group].mean(axis=0) for cent_group in pts_in_centroids]
+
+        if np.all(np.isclose(centroids, new_centroids)):
+            print("\nConverged at iteration", i)
+            break
+
+        centroids = new_centroids
         
     return new_centroids
 
@@ -38,5 +44,5 @@ def kmeans_max_iterations(X, y, num_clusters, distance_fn, max_iterations):
 if __name__ == "__main__":
     X, y = read_csv_get_X_y()
     num_clusters = get_num_clusters(y)
-    centroids = kmeans_max_iterations(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=50)
+    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=50)
     print(centroids)
