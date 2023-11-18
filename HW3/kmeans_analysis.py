@@ -18,6 +18,15 @@ def euclidean_distance(first, second):
 def cosine_distance(first, second):
     return 1 - np.dot(first, second) / (np.linalg.norm(first) * np.linalg.norm(second))
 
+def generalized_jaccard_distance(first, second):
+    min_sum = np.sum(np.minimum(first, second))
+    max_sum = np.sum(np.maximum(first, second))
+    
+    if max_sum == 0:
+        return 0  # Generalized Jaccard distance is 0 when both multisets are empty
+    else:
+        return 1.0 - min_sum / max_sum
+
 def sse(X, centroids, pts_in_centroids):
     sse = 0
 
@@ -62,3 +71,5 @@ if __name__ == "__main__":
     centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=50)
     print('Cosine Distance')
     centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=50)
+    print('Generalized Jaccard Distance')
+    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=50)
