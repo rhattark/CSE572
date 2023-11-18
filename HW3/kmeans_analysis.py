@@ -58,7 +58,8 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
 
         centroids = new_centroids
 
-    print('Sum of squared error: ', sse(X, centroids, pts_in_centroids))
+    sse_value = sse(X, centroids, pts_in_centroids)
+    print('Sum of squared error: ', sse_value)
         
     return new_centroids
 
@@ -67,9 +68,15 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
 if __name__ == "__main__":
     X, y = read_csv_get_X_y()
     num_clusters = get_num_clusters(y)
+
     print('Euclidean Distance:')
-    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=50)
-    print('Cosine Distance')
-    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=50)
-    print('Generalized Jaccard Distance')
-    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=50)
+    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=150)
+    print()
+
+    print('Cosine Distance:')
+    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=150)
+    print()
+
+    print('Generalized Jaccard Distance:')
+    centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=150)
+    print()
