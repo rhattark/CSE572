@@ -38,6 +38,7 @@ def sse(X, centroids, pts_in_centroids):
     return sse
 
 def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
+    np.random.seed(69)
     X_len = len(X)
     random_idx_list = np.random.choice(range(X_len), size=num_clusters, replace=False)
     centroids = X[random_idx_list]
@@ -64,6 +65,35 @@ def kmeans_default(X, y, num_clusters, distance_fn, max_iterations):
         
     return new_centroids, pts_in_centroids
 
+def kmeans_until_convergence(X, y, num_clusters, distance_fn):
+    np.random.seed(69)
+    X_len = len(X)
+    random_idx_list = np.random.choice(range(X_len), size=num_clusters, replace=False)
+    centroids = X[random_idx_list]
+    iter = 0
+
+    while True:
+        print(f"Iteration {iter}", end='\r')
+        iter += 1
+        pts_in_centroids = [[] for _ in range(num_clusters)]
+
+        for pt_idx in range(X_len):
+            distances = [distance_fn(centroid, X[pt_idx]) for centroid in centroids]
+            idx_closest_centroid = np.argmin(distances)
+            pts_in_centroids[idx_closest_centroid].append(pt_idx)
+
+        new_centroids = [X[cent_group].mean(axis=0) for cent_group in pts_in_centroids]
+
+        if np.all(np.isclose(centroids, new_centroids)):
+            print("\nConverged at iteration", iter)
+            break
+
+        centroids = new_centroids
+
+    sse_value = sse(X, centroids, pts_in_centroids)
+        
+    return new_centroids, pts_in_centroids, sse_value
+
 def get_labels_clustered_data(X, y, pts_in_centroids):
     labeled_data = []
     
@@ -88,28 +118,49 @@ if __name__ == "__main__":
 
     # Q1
 
-    print('Euclidean Distance:')
-    euc_centroids, euc_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=150)
-    print()
+    # print('Euclidean Distance:')
+    # euc_centroids, euc_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance, max_iterations=150)
+    # print()
 
-    print('Cosine Distance:')
-    cos_centroids, cos_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=150)
-    print()
+    # print('Cosine Distance:')
+    # cos_centroids, cos_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=cosine_distance, max_iterations=150)
+    # print()
 
-    print('Generalized Jaccard Distance:')
-    jac_centroids, jac_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=150)
-    print()
+    # print('Generalized Jaccard Distance:')
+    # jac_centroids, jac_pts_in_centroids = kmeans_default(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance, max_iterations=150)
+    # print()
 
     # Q2
 
-    euc_labels = get_labels_clustered_data(X, y, euc_pts_in_centroids)
-    euc_accuracy = get_accuracy(euc_labels, y)
-    print(f'Accuracy with Euclidean Distance: {euc_accuracy}%')
+    # euc_labels = get_labels_clustered_data(X, y, euc_pts_in_centroids)
+    # euc_accuracy = get_accuracy(euc_labels, y)
+    # print(f'Accuracy with Euclidean Distance: {euc_accuracy}%')
 
-    cos_labels = get_labels_clustered_data(X, y, cos_pts_in_centroids)
-    cos_accuracy = get_accuracy(cos_labels, y)
-    print(f'Accuracy with Cosine Distance: {cos_accuracy}%')
+    # cos_labels = get_labels_clustered_data(X, y, cos_pts_in_centroids)
+    # cos_accuracy = get_accuracy(cos_labels, y)
+    # print(f'Accuracy with Cosine Distance: {cos_accuracy}%')
 
-    jac_labels = get_labels_clustered_data(X, y, jac_pts_in_centroids)
-    jac_accuracy = get_accuracy(jac_labels, y)
-    print(f'Accuracy with Generalized Jaccard Distance: {jac_accuracy}%')
+    # jac_labels = get_labels_clustered_data(X, y, jac_pts_in_centroids)
+    # jac_accuracy = get_accuracy(jac_labels, y)
+    # print(f'Accuracy with Generalized Jaccard Distance: {jac_accuracy}%')
+
+    # Q3
+
+    print('Euclidean Distance:')
+    euc_conv_centroids, euc_conv_pts_in_centroids, euc_conv_sse = kmeans_until_convergence(X, y, num_clusters=num_clusters, distance_fn=euclidean_distance)
+    print()
+
+    print('Cosine Distance:')
+    cos_conv_centroids, cos_conv_pts_in_centroids, cos_conv_sse = kmeans_until_convergence(X, y, num_clusters=num_clusters, distance_fn=cosine_distance)
+    print()
+
+    print('Generalized Jaccard Distance:')
+    jac_conv_centroids, jac_conv_pts_in_centroids, jac_conv_sse = kmeans_until_convergence(X, y, num_clusters=num_clusters, distance_fn=generalized_jaccard_distance)
+    print()
+
+    # Q4
+
+    print(f'SSE - Euclidean Distance   - Until No change in centroid position: {euc_conv_sse}')
+    print(f'SSE - Cosine Distance      - Until No change in centroid position: {cos_conv_sse}')
+    print(f'SSE - Gen Jaccard Distance - Until No change in centroid position: {jac_conv_sse}')
+    print()
