@@ -1,6 +1,8 @@
 from surprise import Dataset, Reader, SVD, KNNBasic
 import pandas as pd
 from surprise.model_selection import cross_validate
+import matplotlib.pyplot as plt
+import numpy as np
 
 def load_file(file_path):
     print('Reading file...')
@@ -39,6 +41,31 @@ def compare_similarity_metrics(data, user_based):
 
     return mae_list, rmse_list
 
+def plot_similarity_comparison(user_based_mae, user_based_rmse, item_based_mae, item_based_rmse):
+    similarity_metrics = ['cosine', 'msd', 'pearson']
+
+    bar_width = 0.2
+    index = np.arange(len(similarity_metrics))
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # User-Based CF
+    bar1 = ax.bar(index - bar_width, user_based_mae, bar_width, label='User-Based MAE')
+    bar2 = ax.bar(index, user_based_rmse, bar_width, label='User-Based RMSE')
+    
+    # Item-Based CF
+    bar3 = ax.bar(index + bar_width, item_based_mae, bar_width, label='Item-Based MAE')
+    bar4 = ax.bar(index + 2*bar_width, item_based_rmse, bar_width, label='Item-Based RMSE')
+    
+    ax.set_xticks(index)
+    ax.set_xticklabels(similarity_metrics)
+    ax.set_xlabel('Similarity Metrics')
+    ax.set_title('MAE and RMSE for User-Based and Item-Based Collaborative Filtering')
+    ax.legend()
+    
+    plt.savefig('similarity_comparison_user_item.png')
+    plt.show()
+
 if __name__ == '__main__':
     # a
     file_path = 'recommender_data/ratings_small.csv'
@@ -67,3 +94,5 @@ if __name__ == '__main__':
 
     print('\n------------Item based CF Similarity Metrics Comparison------------\n')
     item_based_mae_list, item_based_rmse_list = compare_similarity_metrics(data, False)
+
+    plot_similarity_comparison(user_based_mae_list, user_based_rmse_list, item_based_mae_list, item_based_rmse_list)
