@@ -134,6 +134,7 @@ if __name__ == '__main__':
     print('\n------------Plot similarity comparison------------\n')
     plot_similarity_comparison(user_based_mae_list, user_based_rmse_list, item_based_mae_list, item_based_rmse_list)
 
+    # f
     print('\n------------Plot neighbor comparison - user based------------\n')
     mae_list_user_based, rmse_list_user_based = compare_neighbors(data, True)
     plot_change_in_neighbors(mae_list_user_based, rmse_list_user_based, 'Change in MAE-RMSE vs number of neighbors - User based CF')
@@ -141,3 +142,16 @@ if __name__ == '__main__':
     print('\n------------Plot neighbor comparison - item based------------\n')
     mae_list_item_based, rmse_list_item_based = compare_neighbors(data, True)
     plot_change_in_neighbors(mae_list_item_based, rmse_list_item_based, 'Change in MAE-RMSE vs number of neighbors - Item based CF')
+
+
+    # g
+    print('\n------------Idenify best number of neighbors------------\n')
+    best_k_mae_user = np.argmin(mae_list_user_based) + 1
+    best_k_rmse_user = np.argmin(rmse_list_user_based) + 1
+    best_k_mae_item = np.argmin(mae_list_item_based) + 1
+    best_k_rmse_item = np.argmin(rmse_list_item_based) + 1
+
+    print(f'Best k as per MAE for User based CF: {best_k_mae_user}')
+    print(f'Best k as per RMSE for User based CF: {best_k_rmse_user}')
+    print(f'Best k as per MAE for Item based CF: {best_k_mae_item}')
+    print(f'Best k as per RMSE for Item based CF: {best_k_rmse_item}')
