@@ -24,10 +24,29 @@ def collab_filter_cross_val(data, user_based, similarity='msd'):
     res = cross_validate(cf, data, measures=["MAE", "RMSE"], cv=5)
     return res['test_mae'].mean(), res["test_rmse"].mean()
 
+def compare_similarity_metrics(data, user_based):
+    mae_list = []
+    rmse_list = []
+    titles = ['Cosine similarity:\n', '\nMean Squared Difference similarity:\n', '\nPearson similarity:\n']
+    similarity_metrics = ['cosine', 'msd', 'pearson']
+
+    for title, similarity in zip(titles, similarity_metrics):
+        print(title)
+        test_mae, test_rmse = collab_filter_cross_val(data, user_based, similarity)
+        mae_list.append(test_mae)
+        rmse_list.append(test_rmse)
+        print(f'\nMAE Test: {test_mae} \nRMSE Test: {test_rmse}')
+
+    return mae_list, rmse_list
+
 if __name__ == '__main__':
+    # a
     file_path = 'recommender_data/ratings_small.csv'
     data = load_file(file_path)
 
+    # b is info only
+
+    # c
     print('\n------------PMF------------\n')
     test_mae, test_rmse = pmf(data)
     print(f'\nMAE Test: {test_mae} \nRMSE Test: {test_rmse}')
@@ -40,15 +59,11 @@ if __name__ == '__main__':
     test_mae, test_rmse = collab_filter_cross_val(data, False)
     print(f'\nMAE Test: {test_mae} \nRMSE Test: {test_rmse}')
 
+    # d is in pdf
+
+    # e
     print('\n------------User based CF Similarity Metrics Comparison------------\n')
-    print('Cosine similarity:\n')
-    test_mae, test_rmse = collab_filter_cross_val(data, True, 'cosine')
-    print(f'\nMAE Test: {test_mae} \nRMSE Test: {test_rmse}')
+    user_based_mae_list, user_based_rmse_list = compare_similarity_metrics(data, True)
 
-    print('\nMean Squared Difference similarity:\n')
-    test_mae, test_rmse = collab_filter_cross_val(data, True, 'msd')
-    print(f'\nMAE Test: {test_mae} \nRMSE Test: {test_rmse}')
-
-    print('\nPearson similarity:\n')
-    test_mae, test_rmse = collab_filter_cross_val(data, True, 'pearson')
-    print(f'\nMAE Test: {test_mae} \nRMSE Test: {test_rmse}')
+    print('\n------------Item based CF Similarity Metrics Comparison------------\n')
+    item_based_mae_list, item_based_rmse_list = compare_similarity_metrics(data, False)
