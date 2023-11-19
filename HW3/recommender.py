@@ -66,6 +66,42 @@ def plot_similarity_comparison(user_based_mae, user_based_rmse, item_based_mae, 
     plt.savefig('similarity_comparison_user_item.png')
     plt.show()
 
+def collab_filter_cross_val_with_k(data, user_based, k_ip, similarity='msd'):
+    sim_options = {
+        'user_based': user_based,
+        'name': similarity
+    }
+    cf = KNNBasic(k=k_ip, min_k=1, sim_options=sim_options)
+    res = cross_validate(cf, data, measures=["MAE", "RMSE"], cv=5)
+    return res['test_mae'].mean(), res["test_rmse"].mean()
+
+def compare_neighbors(data, user_based):
+    mae_list, rmse_list = [], []
+    
+    for i in range(1, 26, 1):
+        mae, rmse = collab_filter_cross_val_with_k(data, user_based, i)
+        mae_list.append(mae)
+        rmse_list.append(rmse)
+
+    return mae_list, rmse_list
+
+def plot_change_in_neighbors(mae_list, rmse_list, title):
+    plt.xlabel('Number of neighbors')
+    plt.title(title)
+    
+    ax1 = plt.gca()
+    ax1.set_ylabel('MAE')
+    ax1.plot(range(1, 26, 1), mae_list, label='MAE', color='blue')
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('RMSE')
+    ax2.plot(range(1, 26, 1), rmse_list, label='RMSE', color='red')
+    ax2.tick_params(axis='y', labelcolor='red')
+    
+    plt.legend()
+    plt.savefig(title)
+    plt.show()
+
 if __name__ == '__main__':
     # a
     file_path = 'recommender_data/ratings_small.csv'
@@ -95,4 +131,13 @@ if __name__ == '__main__':
     print('\n------------Item based CF Similarity Metrics Comparison------------\n')
     item_based_mae_list, item_based_rmse_list = compare_similarity_metrics(data, False)
 
+    print('\n------------Plot similarity comparison------------\n')
     plot_similarity_comparison(user_based_mae_list, user_based_rmse_list, item_based_mae_list, item_based_rmse_list)
+
+    print('\n------------Plot neighbor comparison - user based------------\n')
+    mae_list_user_based, rmse_list_user_based = compare_neighbors(data, True)
+    plot_change_in_neighbors(mae_list_user_based, rmse_list_user_based, 'Change in MAE-RMSE vs number of neighbors - User based CF')
+
+    print('\n------------Plot neighbor comparison - item based------------\n')
+    mae_list_item_based, rmse_list_item_based = compare_neighbors(data, True)
+    plot_change_in_neighbors(mae_list_item_based, rmse_list_item_based, 'Change in MAE-RMSE vs number of neighbors - Item based CF')
